@@ -1,28 +1,21 @@
 import cv2
 import numpy as np
 
-#读取并转化灰度图
+#转化灰度图
+img = cv2.imread ("poker.jpg")
+gray = cv2.cvtColor (img , cv2.COLOR_BGR2GRAY)
 
-img_matchtest = cv2.imread("poker.jpg")
-gray = cv2.cvtColor (img_matchtest , cv2.COLOR_BGR2GRAY)
+#模板匹配
+tem = gray [65:110,230:270]
+match = cv2.matchTemplate ( gray ,tem ,cv2.TM_CCOEFF_NORMED)
+locations = np.where (match >= 0.9)
 
-template = cv2.imread ("diamond_template.jpg",0)
+#画图
+h ,w = tem.shape[0:2]
+for p in zip (*locations[::-1]):
+    x1,y1 =p [0],p [1]
+    x2,y2 =x1 +w,y1 +h
+    cv2.rectangle(img , (x1 ,y1),(x2 ,y2),(0,255,0), 2)
 
-w, h = template.shape[::-1]
-
-res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-    
-#设定匹配阈值
-threshold = 0.9
-    
-# 找到所有大于阈值的点
-loc = np.where(res >= threshold)
-
-    # 标记结果
-points = []
-for pt in zip(*loc[::-1]):
-        cv2.rectangle(img_matchtest, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
-
-cv2.imshow('Template Match Result', img_matchtest)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+cv2.imshow ("match_test" , img)
+cv2.waitKey()
